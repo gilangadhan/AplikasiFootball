@@ -20,8 +20,8 @@ import org.jetbrains.anko.recyclerview.v7.recyclerView
 class MainActivity : AppCompatActivity(), MainView {
 
     val data = ArrayList<ClubModel>()
-
-    var response: List<TeamModel> = arrayListOf()
+    lateinit var adapterView : MainAdapter
+    var response: MutableList<TeamModel> = arrayListOf()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,14 +32,15 @@ class MainActivity : AppCompatActivity(), MainView {
         val request = ApiRepository()
         val presenter = MainPresenter(this,request, gson)
         presenter.getTeamList("German%20Bundesliga")
+        adapterView = MainAdapter(response) { data ->
+            toast(data.name)
+        }
         linearLayout {
             padding = dip(8)
             lparams(width = matchParent, height = wrapContent)
             recyclerView {
                 layoutManager = LinearLayoutManager(this@MainActivity)
-                adapter = MainAdapter(response) { data ->
-                    toast(data.name)
-                }
+                adapter = adapterView
             }
         }
     }
@@ -65,7 +66,9 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     override fun showTeamList(data: List<TeamModel>) {
-        response = data
+        response.clear()
+        response.addAll(data)
+        adapterView.notifyDataSetChanged()
     }
 
 }
